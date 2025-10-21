@@ -1,0 +1,682 @@
+---
+title: P4-C1-006
+format: docx
+execute: 
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rmarkdown)
+# Set global chunk options for figure resolution and size
+opts_chunk$set(dpi = 600, fig.width = 15, fig.height = 5)
+```
+
+```{r, echo=FALSE}
+library(DiagrammeRsvg)
+library(rsvg)
+library(png)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+# import data
+result <- omopgenerics::importSummarisedResult(
+  file.path(getwd(), "data")
+) |>
+  dplyr::mutate(
+    cdm_name = dplyr::case_when(
+      cdm_name == "cprd_gold" ~ "CPRD GOLD",
+      T ~ cdm_name
+    )
+  ) |>
+  omopgenerics::newSummarisedResult()
+```
+
+## Point Prevalence Men_B
+```{r, echo=FALSE, fig.width = 9, fig.height = 12}
+# result |>
+#   omopgenerics::filterSettings(
+#     result_type == "prevalence",
+#     denominator_days_prior_observation == "674"
+#   ) |>
+#   dplyr::mutate(
+#     group_level =
+#       dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose",
+#     T ~ group_level
+#       )
+#   ) |>
+#   dplyr::filter(
+#     group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_2_doses", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_3_doses"),
+#     stringr::str_detect(additional_level, "years")
+#   ) |>
+#   IncidencePrevalence::plotPrevalence(
+#     ribbon = F,
+#     colour = "cdm_name",
+#     facet = "outcome_cohort_name",
+#     line = TRUE
+#   )  
+# # + facet_wrap(vars(outcome_cohort_name), ncol = 1)
+
+
+plot_data<-result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "674"
+  ) |>
+  dplyr::mutate(
+    group_level =
+      dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose",
+                       T ~ group_level
+      )
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_2_doses", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_3_doses"),
+    stringr::str_detect(additional_level, "quarter")
+  ) 
+
+plot_data %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_1_dose", "Men B vaccine (at least 1 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_2_doses", "Men B vaccine (at least 2 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_3_doses", "Men B vaccine (at least 3 dose)")) %>% 
+  IncidencePrevalence::plotPrevalence(
+    ribbon = F,
+    colour = c("outcome_cohort_name"),
+    facet = c("cdm_name"),
+    line = F
+    
+  )  +
+  visOmopResults::themeDarwin() + 
+  theme(legend.position = "top", legend.title = element_blank()) + 
+  facet_wrap(vars(cdm_name), ncol = 2)
+  
+
+```
+
+## Point Prevalence Men_B (1 Yr Old)
+```{r, echo=FALSE, fig.width = 9, fig.height = 12}
+
+plot_data<-result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "309"
+  ) |>
+  dplyr::mutate(
+    group_level =
+      dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_1 &&& men_b" ~ "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_1_dose",
+                       T ~ group_level
+      )
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_1 &&& men_b_at_least_1_dose", "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_2_doses", "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_3_doses"),
+    stringr::str_detect(additional_level, "quarter")
+  ) 
+
+plot_data %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_1_dose", "Men B vaccine (at least 1 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_2_doses", "Men B vaccine (at least 2 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_3_doses", "Men B vaccine (at least 3 dose)")) %>% 
+  IncidencePrevalence::plotPrevalence(
+    ribbon = F,
+    colour = c("outcome_cohort_name"),
+    facet = c("cdm_name"),
+    line = F
+    
+  )  +
+  visOmopResults::themeDarwin() + 
+  theme(legend.position = "top", legend.title = element_blank()) + 
+  facet_wrap(vars(cdm_name), ncol = 2)
+  
+
+```
+#### Table_Prevalence Men_B
+```{r, echo=FALSE}
+result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "674"
+  ) |>
+  dplyr::mutate(
+    group_level =
+      dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose",
+    T ~ group_level
+      )
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_2_doses", "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_3_doses"),
+    stringr::str_detect(additional_level, "years")
+  )  %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_1_dose", "Men B vaccine (at least 1 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_2_doses", "Men B vaccine (at least 2 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_3_doses", "Men B vaccine (at least 3 dose)")) %>%  
+  mutate(estimate_value  = as.numeric(estimate_value )) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_lower", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_upper", estimate_value *100, estimate_value)) %>% 
+  arrange(group_level) %>% 
+  IncidencePrevalence::tablePrevalence(
+    # header = c("estimate_name"), 
+    # groupColumn = c("outcome_cohort_name", "cdm_name"), 
+    # to put cdm name at top - move into header
+      header = c("cdm_name","estimate_name" ),
+    groupColumn = c("outcome_cohort_name"),
+    settingsColumn = c(),
+    hide = c("denominator_cohort_name", "analysis_interval",
+             "denominator_age_group",  "denominator_sex",
+             "prevalence_end_date"),
+    style = "darwin"
+  )
+
+```
+
+#### Table_Prevalence Men_B_yr1
+```{r, echo=FALSE}
+result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "309"
+  ) |>
+  dplyr::mutate(
+    group_level =
+      dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_1 &&& men_b" ~ "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_1_dose",
+    T ~ group_level
+      )
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_1 &&& men_b_at_least_1_dose", "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_2_doses", "denominator_prior_observation_cohort_age_1 &&& men_b_at_least_3_doses"),
+    stringr::str_detect(additional_level, "years")
+ )  %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_1_dose", "Meningococcal vaccines group B vaccine (at least 1 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_2_doses", "Meningococcal vaccines group B vaccine (at least 2 dose)")) %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_b_at_least_3_doses", "Meningococcal vaccines group B vaccine (at least 3 dose)")) %>%  
+  mutate(estimate_value  = as.numeric(estimate_value )) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_lower", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_upper", estimate_value *100, estimate_value)) %>% 
+  arrange(group_level) %>% 
+  IncidencePrevalence::tablePrevalence(
+    # header = c("estimate_name"), 
+    # groupColumn = c("outcome_cohort_name", "cdm_name"), 
+    # to put cdm name at top - move into header
+      header = c( "cdm_name","estimate_name"),
+    groupColumn = c("outcome_cohort_name"),
+    settingsColumn = c(),
+    hide = c("denominator_cohort_name", "analysis_interval",
+             "denominator_age_group",  "denominator_sex",
+             "prevalence_end_date"),
+    style = "darwin"
+  )
+
+```
+
+## Point Prevalence Men_C
+```{r, echo=FALSE, fig.width = 9, fig.height = 12}
+# result |>
+#   omopgenerics::filterSettings(
+#     result_type == "prevalence",
+#     denominator_days_prior_observation == "674"
+#   ) |>
+#   dplyr::filter(
+#     group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c"),
+#     # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+#     stringr::str_detect(additional_level, "years")
+#   ) |>
+#   IncidencePrevalence::plotPrevalence(
+#     ribbon = F,
+#     colour = "cdm_name",
+#     facet = "outcome_cohort_name",
+#     line = TRUE
+#   ) 
+
+plot_data<-result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "674"
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c"),
+    # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+    stringr::str_detect(additional_level, "quarters")
+  ) 
+plot_data %>% 
+  IncidencePrevalence::plotPrevalence(
+    ribbon = F,
+    colour = c(),
+    facet = c("cdm_name"),
+    line = F,
+    point = FALSE # Set point to FALSE to prevent plotPrevalence from drawing points
+  )  +
+  ggplot2::geom_point(color = "#003399") +
+    
+  visOmopResults::themeDarwin() + 
+  scale_color_manual() %>% 
+  theme(legend.position = "top", legend.title = element_blank()) + 
+  facet_wrap(vars(cdm_name), ncol = 2)
+
+
+```
+#### Table_Prevalence Men_C
+```{r, echo=FALSE}
+result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "674"
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c"),
+    # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+    stringr::str_detect(additional_level, "years")
+ )  %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "men_c", "Meningococcal group C vaccine (at least 1 dose)")) %>% 
+  mutate(estimate_value  = as.numeric(estimate_value )) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_lower", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_upper", estimate_value *100, estimate_value)) %>% 
+  arrange(group_level) %>% 
+  IncidencePrevalence::tablePrevalence(
+    # header = c("estimate_name"), 
+    # groupColumn = c("outcome_cohort_name", "cdm_name"), 
+    # to put cdm name at top - move into header
+      header = c( "cdm_name","estimate_name"),
+    groupColumn = c("outcome_cohort_name"),
+    settingsColumn = c(),
+    hide = c("denominator_cohort_name", "analysis_interval",
+             "denominator_age_group",  "denominator_sex",
+             "prevalence_end_date"),
+    style = "darwin"
+  )
+
+```
+
+## Point Prevalence MCV4
+```{r, echo=FALSE, fig.width = 9, fig.height = 12}
+# result |>
+#   omopgenerics::filterSettings(
+#     result_type == "prevalence",
+#     denominator_days_prior_observation == "2190"
+#   ) |>
+#   dplyr::filter(
+#     group_level %in% c("denominator_prior_observation_cohort_age_18 &&& mcv4"),
+#     # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+#     stringr::str_detect(additional_level, "years")
+#   ) |>
+#   IncidencePrevalence::plotPrevalence(
+#     ribbon = F,
+#     colour = "cdm_name",
+#     facet = "outcome_cohort_name",
+#     line = TRUE
+#   ) 
+
+plot_data<-result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "2190"
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_18 &&& mcv4"),
+    # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+    stringr::str_detect(additional_level, "quarters")
+  ) 
+
+plot_data %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "mcv4", "Quadrivalent Meningococcal conjugate vaccines (MCV4)")) %>% 
+  IncidencePrevalence::plotPrevalence(
+    ribbon = F,
+    colour = c(),
+    facet = c("cdm_name"),
+    line = F,
+    point = FALSE, # Set point to FALSE to prevent plotPrevalence from drawing points
+    ymin = NULL, # Set ymin to NULL to remove error bars
+    ymax = NULL
+  )  +
+  ggplot2::geom_point(color = "#003399") +
+  visOmopResults::themeDarwin() + 
+  scale_color_manual() %>% 
+  theme(legend.position = "top", legend.title = element_blank()) + 
+  facet_wrap(vars(cdm_name), ncol = 2)
+```
+#### Table_Prevalence MCV4
+```{r, echo=FALSE}
+result |>
+  omopgenerics::filterSettings(
+    result_type == "prevalence",
+    denominator_days_prior_observation == "2190"
+  ) |>
+  dplyr::filter(
+    group_level %in% c("denominator_prior_observation_cohort_age_18 &&& mcv4"),
+    # group_level %in% c("denominator_prior_observation_cohort_age_2 &&& men_c_exact_1_dose"),
+    stringr::str_detect(additional_level, "years")
+  )  %>% 
+  mutate(group_level = stringr::str_replace_all(group_level, "mcv4", "MCV4")) %>% 
+  mutate(estimate_value  = as.numeric(estimate_value )) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_lower", estimate_value *100, estimate_value)) %>% 
+  mutate(estimate_value  = if_else(estimate_name  == "prevalence_95CI_upper", estimate_value *100, estimate_value)) %>% 
+  arrange(group_level) %>% 
+  IncidencePrevalence::tablePrevalence(
+    header = c("cdm_name", "estimate_name"), 
+    groupColumn = c("outcome_cohort_name"), 
+    settingsColumn = c(),
+    hide = c("denominator_cohort_name", "analysis_interval",
+             "denominator_age_group",  "denominator_sex",
+             "prevalence_end_date"),
+    style = "darwin"
+  )
+```
+
+#### Table_1
+```{r, echo=FALSE}
+# Table 1
+# result |>
+#   omopgenerics::filterSettings(
+#     result_type == "summarise_characteristics"
+#   ) |>
+#   dplyr::filter(strata_level =="overall", 
+#                 group_level %in% c("mcv4", "men_c", "men_b"),
+#                 !variable_name %in% c("Cohort start date", "Cohort end date", "Prior observation")
+#                 )|>
+#   CohortCharacteristics::tableCharacteristics(
+#     type = "gt"
+#   )
+table_data<-result |>
+  omopgenerics::filterSettings(
+    result_type == "summarise_characteristics", 
+    table_name != "temp"
+  ) |>
+  dplyr::filter(strata_level =="overall", 
+                group_level %in% c("mcv4", "men_c", "men_b"),
+                !variable_name %in% c("Cohort start date", "Cohort end date", "Prior observation")
+  )
+
+ 
+table_data %>% 
+  filter(variable_name %in% c("Number subjects", "Age", "Sex")) %>% 
+  filter(is.na(variable_level) | !variable_level %in% c("Female", "Unknown")) %>% 
+  CohortCharacteristics::tableCharacteristics(
+    type = "gt",
+    header = c("cdm_name", "cohort_name"), 
+    groupColumn = character(), 
+    # hide = c(additionalColumns(table_data), 
+    #          settingsColumns(table_data),
+    #          c("age","age_group", "sex"))
+  )
+```
+<!-- # #### Flowchart_MenB -->
+<!-- # ```{r, echo=FALSE} -->
+<!-- # # Flowchart MenB -->
+<!-- # result |> -->
+<!-- #   omopgenerics::filterSettings( -->
+<!-- #     result_type == "summarise_cohort_attrition", -->
+<!-- #   ) |> -->
+<!-- #   # dplyr::mutate( -->
+<!-- #   #   group_level = -->
+<!-- #   #     dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", -->
+<!-- #   #   T ~ group_level -->
+<!-- #   #     ) |> -->
+<!-- #   dplyr::filter( -->
+<!-- #       # cdm_name== "BIFAP", -->
+<!-- #     !cdm_name %in% c("InGef"), -->
+<!-- #       group_level == "men_b" -->
+<!-- #   ) |> -->
+<!-- #   CohortCharacteristics::plotCohortAttrition(type = "png" -->
+<!-- #   ) -->
+<!-- #   # visOmopResults::visOmopTable() -->
+<!-- # ``` -->
+<!-- #### Flowchart_MenC -->
+<!-- # ```{r, echo=FALSE} -->
+<!-- # Flowchart MenC -->
+<!-- # result |> -->
+<!-- #   omopgenerics::filterSettings( -->
+<!-- #     result_type == "summarise_cohort_attrition", -->
+<!-- #   ) |> -->
+<!-- #   # dplyr::mutate( -->
+<!-- #   #   group_level = -->
+<!-- #   #     dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", -->
+<!-- #   #   T ~ group_level -->
+<!-- #   #     ) |> -->
+<!-- #   dplyr::filter( -->
+<!-- #       # cdm_name== "BIFAP",  -->
+<!-- #     !cdm_name %in% c("InGef"), -->
+<!-- #       group_level == "men_c" -->
+<!-- #   ) |> -->
+<!-- #   CohortCharacteristics::plotCohortAttrition(type = "png") -->
+<!-- #   # visOmopResults::visOmopTable() -->
+<!-- # ``` -->
+<!-- #### Flowchart_MCV4 -->
+<!-- # ```{r, echo=FALSE} -->
+<!-- # Flowchart MCV4 -->
+<!-- # result |> -->
+<!-- #   omopgenerics::filterSettings( -->
+<!-- #     result_type == "summarise_cohort_attrition", -->
+<!-- #   ) |> -->
+<!-- #   # dplyr::mutate( -->
+<!-- #   #   group_level = -->
+<!-- #   #     dplyr::case_when(group_level == "denominator_prior_observation_cohort_age_2 &&& men_b" ~ "denominator_prior_observation_cohort_age_2 &&& men_b_at_least_1_dose", -->
+<!-- #   #   T ~ group_level -->
+<!-- #   #     ) |> -->
+<!-- #   dplyr::filter( -->
+<!-- #       # cdm_name== "BIFAP",  -->
+<!-- #     !cdm_name %in% c("InGef"), -->
+<!-- #       group_level == "mcv4" -->
+<!-- #   ) |> -->
+<!-- #   CohortCharacteristics::plotCohortAttrition(type = "png") -->
+<!-- #   # visOmopResults::visOmopTable() -->
+<!-- # ``` -->
+#### histogram
+```{r, echo=FALSE}
+library(CohortCharacteristics)
+library(dplyr)
+library(ggplot2)
+library(IncidencePrevalence)
+library(omopgenerics)
+library(OmopSketch)
+library(purrr)
+library(readr)
+library(rlang)
+library(sortable)
+library(tidyr)
+library(visOmopResults)
+library(yaml)
+library(here)
+library(scales)
+
+options(scipen = 999)
+
+# load data
+fileData <- file.path(getwd(), "data", "shinyData.RData")
+if (!file.exists(fileData)) {
+  source(file.path(getwd(), "data", "preprocess.R"))
+}
+load(fileData)
+
+# create histogram folder 
+resultFolderPath <- here::here("plots")
+if (!file.exists(resultFolderPath)){
+  dir.create(resultFolderPath, recursive = TRUE)}
+
+histogram_data <- data$summarise_characteristics |>
+  dplyr::mutate(
+    cdm_name = 
+      case_when(cdm_name == "cprd_gold" ~ "CPRD GOLD",
+                T ~ cdm_name)
+  )
+
+group_levels <- histogram_data |>
+  dplyr::select("group_level") |>
+  unique() |>
+  dplyr::pull("group_level")
+
+age_groups <- c("0 to 5", "6 to 10", "11 to 15", "16 to 20", "21 to 25", 
+                "26 to 30", "31 to 35", "36 to 40", "41 to 45", "46 to 50", 
+                "51 to 55", "56 to 60", "61 to 65", "66 to 70", "71 to 75", 
+                "76 to 80", "81 to 85", "86 to 90", "91 to 95", "96 to 100", "101 to 105",
+                "106 to 110", "111 to 115", "116 to 120", "126 to 130", "131 to 135",
+                "136 to 140", "141 to 145", "146 to 150")
+
+# Age bands 5-yrs plots
+for (group_level in group_levels) {
+  plot_data <- histogram_data |> 
+    visOmopResults::tidy() |>
+    dplyr::filter(.data$cohort_name %in% group_level) |>
+    dplyr::filter(
+      !.data$sex %in% "overall",
+      .data$variable_name %in% "Number subjects",
+      !.data$age_group %in% "overall"
+    ) |>
+    dplyr::mutate(age_group = factor(.data$age_group, levels = age_groups)) |>
+    dplyr::arrange(.data$age_group) |>
+    mutate(count = ifelse(sex == "Male", -count, count))
+  
+  p <- ggplot(plot_data, aes(x = age_group, y = count, fill = sex)) +
+    geom_col(width = 1, color = "black") +  
+    scale_y_continuous(labels = abs) +
+    facet_wrap(~ cdm_name, scales = "free") +
+    labs(
+      title = paste0("Number of Subjects by Sex in 5-yrs Age Bands, ", group_level),
+      x = "Age Group",
+      y = "Count",
+      fill = "Sex"
+    ) +
+    scale_y_continuous(labels = function(x) scales::comma(abs(x)))+
+    theme_minimal() +
+    theme(
+      plot.background  = element_rect(fill = "darkblue", colour = NA),
+      panel.background = element_rect(fill = "darkblue", colour = NA),
+      panel.grid = element_line(color = "lightblue"),
+      axis.text = element_text(color = "white"),
+      axis.title = element_text(color = "white"),
+      strip.background = element_rect(fill = "navy", colour = NA),
+      strip.text = element_text(color = "white"),
+      plot.title = element_text(color = "white", size = 16, face = "bold")
+    )+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+  name <- paste0("histogram_by_sex_5s_", group_level, ".png")
+  ggsave(file = here(resultFolderPath, name), width = 15, height = 5, device = "tiff", dpi = 300)
+}
+
+for (group_level in group_levels) {
+  plot_data <- histogram_data |> 
+    visOmopResults::tidy() |>
+    dplyr::filter(.data$cohort_name %in% group_level) |>
+    dplyr::filter(
+      .data$sex %in% "overall",
+      !.data$age_group %in% "overall"
+    ) |>
+    dplyr::mutate(age_group = factor(.data$age_group, levels = age_groups)) |>
+    dplyr::filter(.data$variable_name == "Number subjects") |>
+    dplyr::arrange(.data$cdm_name, .data$age_group) 
+  
+  p <- ggplot(plot_data, aes(x = age_group, y = count)) +
+    geom_col(width = 1, color = "black") +  
+    scale_y_continuous(labels = abs) +
+    facet_wrap(~ cdm_name, scales = "free") +
+    labs(
+      title = paste0("Number of Subjects Overall in 5-yrs Age Bands, ", group_level),
+      x = "Age Group",
+      y = "Count",
+      fill = "Sex"
+    ) + 
+    scale_y_continuous(labels = function(x) scales::comma(abs(x)))+
+    theme_minimal() +
+    theme(
+      plot.background  = element_rect(fill = "darkblue", colour = NA),
+      panel.background = element_rect(fill = "darkblue", colour = NA),
+      panel.grid = element_line(color = "lightblue"),
+      axis.text = element_text(color = "white"),
+      axis.title = element_text(color = "white"),
+      strip.background = element_rect(fill = "navy", colour = NA),
+      strip.text = element_text(color = "white"),
+      plot.title = element_text(color = "white", size = 16, face = "bold")
+    )+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  
+  name <- paste0("histogram_overall_5s_", group_level, ".png")
+  ggsave(file = here(resultFolderPath, name), width = 15, height = 5, device = "tiff", dpi = 300)
+}
+
+# Age bands 1-yrs plots
+for (group_level in group_levels) {
+  plot_data <- histogram_data |> 
+    visOmopResults::tidy() |>
+    dplyr::filter(.data$cohort_name %in% group_level) |>
+    dplyr::filter(
+      !.data$sex %in% "overall",
+      .data$variable_name %in% "Number subjects",
+      .data$age_group %in% "overall"
+    ) |>
+    mutate(age = as.numeric(age)) |>
+    arrange(age)|>
+    mutate(count = ifelse(sex == "Male", -count, count))
+  
+  p <- ggplot(plot_data, aes(x = age, y = count, fill = sex)) +
+    geom_col(width = 1, color = "black") +  
+    facet_wrap(~ cdm_name, scales = "free") +
+    labs(
+      title = paste0("Number of Subjects by Sex in 1-yr Age Bands, ", group_level),
+      x = "Age Group",
+      y = "Count",
+      fill = "Sex"
+    ) +
+    scale_x_continuous(breaks = seq(0, 150, by = 5)) + 
+    scale_y_continuous(labels = function(x) scales::comma(abs(x)))+
+    theme_minimal() +
+    theme(
+      plot.background  = element_rect(fill = "darkblue", colour = NA),
+      panel.background = element_rect(fill = "darkblue", colour = NA),
+      panel.grid = element_line(color = "lightblue"),
+      axis.text = element_text(color = "white"),
+      axis.title = element_text(color = "white"),
+      strip.background = element_rect(fill = "navy", colour = NA),
+      strip.text = element_text(color = "white"),
+      plot.title = element_text(color = "white", size = 16, face = "bold")
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  name <- paste0("histogram_by_sex_1s_", group_level, ".png")
+  ggsave(file = here(resultFolderPath, name), width = 15, height = 5, device = "tiff", dpi = 300)
+}
+
+for (group_level in group_levels) {
+  plot_data <- histogram_data |> 
+    visOmopResults::tidy() |>
+    dplyr::filter(.data$cohort_name %in% group_level) |>
+    dplyr::filter(
+      .data$sex %in% "overall",
+      .data$variable_name %in% "Number subjects",
+      .data$age_group %in% "overall",
+      !.data$age %in% "overall"
+    ) |>
+    mutate(age = as.numeric(age)) |>
+    arrange(age)
+  
+  p <- ggplot(plot_data, aes(x = age, y = count, fill = sex)) +
+    geom_col(width = 1, color = "black") + 
+    facet_wrap(~ cdm_name, scales = "free") +
+    labs(
+      title = paste0("Number of Subjects by Sex in 1-yr Age Bands, ", group_level),
+      x = "Age Group",
+      y = "Count",
+      fill = "Sex"
+    ) +
+    scale_x_continuous(breaks = seq(0, 150, by = 5)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+    scale_y_continuous(labels = function(x) scales::comma(abs(x)))+
+    theme_minimal() +
+    theme(
+      plot.background  = element_rect(fill = "darkblue", colour = NA),
+      panel.background = element_rect(fill = "darkblue", colour = NA),
+      panel.grid = element_line(color = "lightblue"),
+      axis.text = element_text(color = "white"),
+      axis.title = element_text(color = "white"),
+      strip.background = element_rect(fill = "navy", colour = NA),
+      strip.text = element_text(color = "white"),
+      plot.title = element_text(color = "white", size = 16, face = "bold")
+    ) 
+  
+  name <- paste0("histogram_overall_1s_", group_level, ".png")
+  ggsave(file = here(resultFolderPath, name), width = 15, height = 5, device = "tiff", dpi = 300)
+}
+
+```
