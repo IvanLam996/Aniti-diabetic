@@ -1,37 +1,67 @@
-
 # denominator cohort - for point prevalence analysis -----
 info(logger, "Instantiating denominator cohort")
 
-# create the denominator cohort stratifying by age and sex
+for (i in seq_along(denominator_age_groups)){
+  cdm <- generateDenominatorCohortSet(
+    cdm = cdm,
+    name = paste0("denominator_", denominator_age_groups[i]),
+    ageGroup = list(c(denominator_age_groups[i], denominator_age_groups[i])), 
+    sex = c("Female", "Male", "Both"),
+    cohortDateRange = c(
+      study_period_start,
+      study_period_end
+    )
+  ) 
+  
+  cdm[[paste0("denominator_", denominator_age_groups[i])]] <- cdm[[paste0("denominator_", denominator_age_groups[i])]] |>
+    CohortConstructor::renameCohort(cohortId = 1,
+                                    newCohortName = paste0("denominator_no_prior_observation_cohort_female_age_", denominator_age_groups[i])) |>
+    CohortConstructor::renameCohort(cohortId = 2,
+                                    newCohortName = paste0("denominator_no_prior_observation_cohort_male_age_", denominator_age_groups[i])) |>
+    CohortConstructor::renameCohort(cohortId = 3,
+                                    newCohortName = paste0("denominator_no_prior_observation_cohort_age_", denominator_age_groups[i]))
+}
+
 cdm <- generateDenominatorCohortSet(
   cdm = cdm,
-  name = "denominator",
-  ageGroup = list(c(18, 44), c(45, 64), c(65, 150)), 
+  name = "denominator_12_18",
+  ageGroup = list(c(12, 18)), 
   sex = c("Female", "Male", "Both"),
-  cohortDateRange = c(study_period_start, "2025-01-01")
+  cohortDateRange = c(
+    study_period_start,
+    study_period_end
+  )
 ) 
 
-#  Add ethnicity as a column
-cdm$denominator <- cdm$denominator |>
-  left_join(
-    cdm$person |>
-      addConceptName(column = "race_concept_id", nameStyle = "ethnicity") |>
-      select(subject_id = "person_id", "ethnicity"),
-    by = "subject_id"
-  ) |>
-  compute(name = "denominator")
+cdm[["denominator_12_18"]] <- cdm[["denominator_12_18"]] |>
+  CohortConstructor::renameCohort(cohortId = 1,
+                                  newCohortName = "denominator_no_prior_observation_cohort_female_age_12_18") |>
+  CohortConstructor::renameCohort(cohortId = 2,
+                                  newCohortName = "denominator_no_prior_observation_cohort_male_age_12_18") |>
+  CohortConstructor::renameCohort(cohortId = 3,
+                                  newCohortName = "denominator_no_prior_observation_cohort_age_12_18")
 
-#  Add the townsend index as a column
-cdm$denominator <- cdm$denominator |>
-  left_join(
-    cdm$measurement |> 
-      filter(measurement_concept_id == 715996) |>
-      select(subject_id = "person_id", townsend = "value_as_number"),
-    by = "subject_id"
-  ) |>
-  compute(name = "denominator")
-
-# to use estimateIncidence(strata = list(c("ethnicity", "townsend")))
+for (i in seq_along(denominator_age_groups)){
+  cdm <- generateDenominatorCohortSet(
+    cdm = cdm,
+    name = paste0("denominator_prior_observation_", denominator_age_groups[i]),
+    ageGroup = list(c(denominator_age_groups[i], denominator_age_groups[i])), 
+    sex = c("Female", "Male", "Both"),
+    cohortDateRange = c(
+      study_period_start,
+      study_period_end
+    ),
+    daysPriorObservation = if (i %in% c(1,2)) {study_prior_observation[i] - 56} else {study_prior_observation[i]}
+  ) 
+  
+  cdm[[paste0("denominator_prior_observation_", denominator_age_groups[i])]] <- cdm[[paste0("denominator_prior_observation_", denominator_age_groups[i])]] |>
+    CohortConstructor::renameCohort(cohortId = 1,
+                                    newCohortName = paste0("denominator_prior_observation_cohort_female_age_", denominator_age_groups[i])) |>
+    CohortConstructor::renameCohort(cohortId = 2,
+                                    newCohortName = paste0("denominator_prior_observation_cohort_male_age_", denominator_age_groups[i])) |>
+    CohortConstructor::renameCohort(cohortId = 3,
+                                    newCohortName = paste0("denominator_prior_observation_cohort_age_", denominator_age_groups[i]))
+}
 
 # Reading codelists
 info(logger, "read codelists")

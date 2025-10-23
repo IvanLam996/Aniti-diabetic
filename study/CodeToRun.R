@@ -1,5 +1,3 @@
-# renv ----
-renv::restore()
 
 # load required packages ----
 library(omopgenerics)
@@ -17,7 +15,6 @@ library(DBI)
 library(log4r)
 library(here)
 library(RPostgres)
-library(odbc)
 
 # database details -----
 db <- DBI::dbConnect("....")

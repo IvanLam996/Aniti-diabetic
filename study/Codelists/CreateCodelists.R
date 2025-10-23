@@ -13,14 +13,20 @@ library(janitor)
 library(here)
 library(dplyr)
 library(purrr)
+library(RPostgres)
 
-db <- DBI::dbConnect("...")
+db <- DBI::dbConnect(drv = Postgres(),
+                     dbname = "cdm_gold_202501",
+                     host = "163.1.65.51",
+                     port = "5432",
+                     user = "ilam",
+                     password = "SpringnOxford2025!")
 
 cdm <- CDMConnector::cdmFromCon(
   con = db,
-  cdmSchema = "...",
-  writeSchema = "...",
-  writePrefix = "..."
+  cdmSchema = "public_100k",
+  writeSchema = "results",
+  writePrefix = "anti_diabetic"
 )
 
 codelistOutputFolder <- here::here("OutputFolder")
@@ -29,7 +35,7 @@ if (!dir.exists(codelistOutputFolder)) {
   dir.create(codelistOutputFolder)
 }
 
-file_path <- here("input", "codelist_combined_vaccines.xlsx")
+file_path <- here("input", "codelist_anti_diabetic.xlsx")
 sheet_names <- excel_sheets(file_path)
 codelist <- map_dfr(sheet_names, ~
                       read_excel(file_path, sheet = .x) |>
