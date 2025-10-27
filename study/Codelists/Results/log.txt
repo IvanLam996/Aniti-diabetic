@@ -1,3 +1,5 @@
 INFO  [2025-10-23 17:20:23] Manipulating CDM object
 INFO  [2025-10-23 17:20:36] Setting up study parameters
 INFO  [2025-10-23 17:21:27] Starting to instantiate cohorts
+INFO  [2025-10-27 11:06:01] Instantiating denominator cohort
+INFO  [2025-10-27 11:13:22] Instantiating GLP1 cohorts
