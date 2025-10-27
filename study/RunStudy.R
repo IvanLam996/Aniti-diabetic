@@ -20,11 +20,11 @@ cdm$person <- cdm$person |>
 
 # Shared study parameters ----
 info(logger, "Setting up study parameters")
-study_period_start <- as.Date("2017-01-01")
+study_period_start <- as.Date("2015-01-01")
 study_period_end <- as.Date(NA)
-denominator_age_groups <- c(1,2,18)
+denominator_age_groups <- c(18, Inf)
 study_sex <- c("Both", "Male", "Female")
-study_prior_observation <- c(365, 730, 2190)
+study_prior_observation <- c(365)
 
 # Instantiate Cohorts ----
 info(logger, "Starting to instantiate cohorts")
