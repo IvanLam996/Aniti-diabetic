@@ -1,50 +1,38 @@
 # for point prevalence analysis-----
 info(logger, "Instantiating denominator cohort")
 
-for (i in 1:length(denominator_age_groups)){
-  outcomeCohortId <- omopgenerics::settings(cdm$study_population) |>
-    dplyr::filter(
-      if(denominator_age_groups[i] == 1) cohort_name %in% c("bexsero", "trumenba", "men_b", "men_b_at_least_2_doses", "men_b_at_least_3_doses", "men_b_exact_1_dose", "men_b_exact_2_doses", "men_b_exact_3_doses")
-      else if (denominator_age_groups[i] == 2) cohort_name %in% c("men_c", "men_c_exact_1_dose", "bexsero", "trumenba", "men_b", "men_b_at_least_2_doses", "men_b_at_least_3_doses", "men_b_exact_1_dose", "men_b_exact_2_doses", "men_b_exact_3_doses")
-      else if (denominator_age_groups[i] == 18) cohort_name %in% c("mcv4", "mcv4_exact_1_dose", "menveo", "nimenrix")) |>
-    dplyr::pull("cohort_definition_id")
-  
-    info(logger, paste0("Estimating point prevalence at age ", denominator_age_groups[i]))
-    results[[paste0("point_prevalence_age_", denominator_age_groups[i])]] <- estimatePointPrevalence(
-      cdm = cdm,
-      denominatorTable = paste0("denominator_", denominator_age_groups[i]),
-      outcomeTable = "study_population",
-      outcomeCohortId = outcomeCohortId,
-      interval = c("quarters", "years")
-    )
-}
+estimatePeriodPrevalence(cdm=cdm, denominatorTable = person, outcomeCohortId = glp1_codelist)
 
-outcomeCohortId18 <- omopgenerics::settings(cdm$study_population) |>
-  dplyr::filter(cohort_name %in% c("mcv4", "mcv4_exact_1_dose", "menveo", "nimenrix")) |>
-  dplyr::pull("cohort_definition_id")
-
-results[["point_prevalence_age_12_18"]] <- estimatePointPrevalence(
-  cdm = cdm,
-  denominatorTable = "denominator_12_18",
-  outcomeTable = "study_population",
-  outcomeCohortId = outcomeCohortId,
-  interval = c("quarters", "years")
+# to create the age groups
+cdm <- generateTargetDenominatorCohortSet(
+  cdm = cdm, 
+  name = "denominator",
+  targetCohortTable = "study_population"
 )
 
-for (i in 1:length(denominator_age_groups)){
-  outcomeCohortId <- omopgenerics::settings(cdm$study_population) |>
-    dplyr::filter(
-      if(denominator_age_groups[i] == 1) cohort_name %in% c("bexsero", "trumemba", "men_b", "men_b_at_least_2_doses", "men_b_at_least_3_doses", "men_b_exact_1_dose", "men_b_exact_2_doses", "men_b_exact_3_doses")
-      else if (denominator_age_groups[i] == 2) cohort_name %in% c("men_c", "men_c_exact_1_dose", "bexsero", "trumemba", "men_b", "men_b_at_least_2_doses", "men_b_at_least_3_doses", "men_b_exact_1_dose", "men_b_exact_2_doses", "men_b_exact_3_doses")
-      else if (denominator_age_groups[i] == 18) cohort_name %in% c("mcv4", "mcv4_exact_1_dose", "menveo", "nimenrix")) |>
-    dplyr::pull("cohort_definition_id")
+drug_cohorts <- c("glp1", "sglt2", "dpp4")
+all_prevalence_estimates <- list()
+
+for (drug in drug_cohorts){
   
-  info(logger, paste0("Estimating point prevalence at age ", denominator_age_groups[i]))
-  results[[paste0("point_prevalence_prior_observation_age_", denominator_age_groups[i])]] <- estimatePointPrevalence(
-    cdm = cdm,
-    denominatorTable = paste0("denominator_prior_observation_", denominator_age_groups[i]),
-    outcomeTable = "study_population",
-    outcomeCohortId = outcomeCohortId,
-    interval = c("quarters", "years")
+  prev_estimate <- estimatePeriodPrevalence(
+    cdm=cdm, 
+    denominatorTable= "denominator",
+    outcomeTable = paste0(drug, "_codelist"),
+    interval = "Years",
+    # strata = list(c("ethnicity", "townsend"))
   )
+  
+  all_prevalence_estimates[[drug]] <- prev_estimate
 }
+
+final_prevalence_results <- bind(all_prevalence_estimates)
+
+# to create a table
+tablePrevalence(final_prevalence_results)
+
+# to export the csv file
+exportSummarisedResult(final_prevalence_results, fileName = "my_results.csv")
+
+# to import the csv
+importSummarisedResult(path = "my_results.csv")

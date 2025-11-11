@@ -22,7 +22,7 @@ cdm$person <- cdm$person |>
 info(logger, "Setting up study parameters")
 study_period_start <- as.Date("2015-01-01")
 study_period_end <- as.Date(NA)
-denominator_age_groups <- c(18, Inf)
+denominator_age_groups <- c(18, 150)
 study_sex <- c("Both", "Male", "Female")
 study_prior_observation <- c(365)
 
